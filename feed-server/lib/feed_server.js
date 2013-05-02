@@ -89,7 +89,7 @@ function FeedServer(config)
       response.end('Not found (code:1)');
       return;
     }
-    // TODO: detemine user and check.
+    // detemine user and check it.
     var user = userData.getInstance(path.join(usersDir, args[0]));
     if (!user) {
       response.writeHead(404);

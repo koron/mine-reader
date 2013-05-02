@@ -3,29 +3,29 @@
 ## Data files spec.
 
 *   `{DATADIR}/{USER_ID}/subscriptions`
-    * GET
-    * PATCH
-        * ADD
-        * REPLACE
-        * REMOVE
+    *   GET
+    *   PATCH
+        *   ADD
+        *   REPLACE
+        *   REMOVE
 *   `{DATADIR}/{USER_ID}/categories`
-    * GET
-    * PATCH
-        * ADD
-        * REPLACE
-        * REMOVE
+    *   GET
+    *   PATCH
+        *   ADD
+        *   REPLACE
+        *   REMOVE
 *   `{DATADIR}/{USER_ID}/feeds`
-    * GET
+    *   GET
 *   `{DATADIR}/{USER_ID}/unreads`
-    * GET
-    * PATCH
-        * ADD
-        * REMOVE
+    *   GET
+    *   PATCH
+        *   ADD
+        *   REMOVE
 *   `{DATADIR}/{USER_ID}/favorites`
-    * GET
-    * PATCH
-        * ADD
-        * REMOVE
+    *   GET
+    *   PATCH
+        *   ADD
+        *   REMOVE
 
 ## URL
 
@@ -41,3 +41,19 @@ Variable     |Description
 Select sub-method by 'X-PATCH-SUBMETHOD' HTTP request header.
 
 Sub-method: one of `ADD`, `REPLACE`, `REMOVE`
+
+## Data file format
+
+Based on JSON.
+
+```
+{"id":"123456","rev":"5",...}
+{"id":"11","rev":"1",...}
+{"id":"12345678901234567","rev":"3",...}
+...
+...
+```
+
+*   One JSON object per one line.
+*   Tail is not `,`.
+*   Must contain `id` and `rev` properties.

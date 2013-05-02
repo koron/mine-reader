@@ -4,6 +4,7 @@
   "description": "Feed server",
   "main": "./lib/feed_server.js",
   "dependencies": {
+    "node-fs": "~0.1.5"
   },
   "devDependencies": {},
   "scripts": {

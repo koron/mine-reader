@@ -5,12 +5,16 @@ module.exports = FeedServer;
 var http = require('http');
 var domain = require('domain');
 var url = require('url');
+var fs = require('node-fs');
+var userData = require('./user_data.js');
+var path = require('path');
 
 var PREFIX = '/feed/users/';
 
 function FeedServer(config)
 {
   var httpServer = http.createServer(handleRequest2);
+  var usersDir = config.users_dir;
   var resourceHandlers = {
     'subscriptions': {
       'GET': handleSubscriptionsGet,
@@ -86,16 +90,21 @@ function FeedServer(config)
       return;
     }
     // TODO: detemine user and check.
-    var userId = args[0];
-    // detemine request resource handler.
-    var handler = determineHandler(args[1], determineMethod(request));
-    if (!handler) {
+    var user = userData.getInstance(path.join(usersDir, args[0]));
+    if (!user) {
       response.writeHead(404);
       response.end('Not found (code:2)');
       return;
     }
+    // detemine request resource handler.
+    var handler = determineHandler(args[1], determineMethod(request));
+    if (!handler) {
+      response.writeHead(404);
+      response.end('Not found (code:3)');
+      return;
+    }
     // dispatch to handler.
-    handler(request, response, userId, query);
+    handler(request, response, user, query);
   }
 
   function determineHandler(resource, method)
@@ -221,6 +230,9 @@ function FeedServer(config)
 
 FeedServer.prototype.start = function()
 {
+  // create users dir, when not exists.
+  fs.mkdirSync(this.config.users_dir, 0755, true);
+  // start HTTP server.
   this.httpServer.listen(this.config.port);
   console.log('FeedServer start on port %d', this.config.port);
 }

@@ -1,0 +1,37 @@
+# feed server
+
+## Data files spec.
+
+*   `{DATADIR}/{USER_ID}/subscriptions`
+    * GET
+    * PATCH
+        * ADD
+        * REPLACE
+        * REMOVE
+*   `{DATADIR}/{USER_ID}/categories`
+    * GET
+    * PATCH
+        * ADD
+        * REPLACE
+        * REMOVE
+*   `{DATADIR}/{USER_ID}/feeds`
+    * GET
+*   `{DATADIR}/{USER_ID}/unreads`
+    * GET
+    * PATCH
+        * ADD
+        * REMOVE
+*   `{DATADIR}/{USER_ID}/favorites`
+    * GET
+    * PATCH
+        * ADD
+        * REMOVE
+
+## URL
+
+    /feed/users/{USER_ID}/{RESOURCE}
+
+Variable     |Description
+-------------|------------
+`{USER_ID}`  |user ID.
+`{RESOURCE}` |One of `subscriptions`, `categories`, `feeds`, `unreads`, `favorites`.

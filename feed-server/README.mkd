@@ -35,3 +35,9 @@ Variable     |Description
 -------------|------------
 `{USER_ID}`  |user ID.
 `{RESOURCE}` |One of `subscriptions`, `categories`, `feeds`, `unreads`, `favorites`.
+
+## PATCH METHOD
+
+Select sub-method by 'X-PATCH-SUBMETHOD' HTTP request header.
+
+Sub-method: one of `ADD`, `REPLACE`, `REMOVE`

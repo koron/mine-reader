@@ -12,11 +12,31 @@ function FeedServer(config)
 {
   var httpServer = http.createServer(handleRequest2);
   var resourceHandlers = {
-    'subscriptions': handleSubscriptions,
-    'categories': handleCategories,
-    'feeds': handleFeeds,
-    'unreads': handleUnreads,
-    'favorites': handleFavorites,
+    'subscriptions': {
+      'GET': handleSubscriptionsGet,
+      'PATCH_ADD': handleSubscriptionsPatchAdd,
+      'PATCH_REPLACE': handleSubscriptionsPatchReplace,
+      'PATCH_REMOVE': handleSubscriptionsPatchRemove,
+    },
+    'categories': {
+      'GET': handleCategoriesGet,
+      'PATCH_ADD': handleCategoriesPatchAdd,
+      'PATCH_REPLACE': handleCategoriesPatchReplace,
+      'PATCH_REMOVE': handleCategoriesPatchRemove,
+    },
+    'feeds': {
+      'GET': handleFeedsGet,
+    },
+    'unreads': {
+      'GET': handleUnreadsGet,
+      'PATCH_ADD': handleUnreadsPatchAdd,
+      'PATCH_REMOVE': handleUnreadsPatchRemove,
+    },
+    'favorites': {
+      'GET': handleFavoritesGet,
+      'PATCH_ADD': handleFavoritesPatchAdd,
+      'PATCH_REMOVE': handleFavoritesPatchRemove,
+    }
   };
 
   this.config = config;
@@ -58,61 +78,144 @@ function FeedServer(config)
       response.end('Not found (code:0)');
       return;
     }
-    // extract args (userId, handler) from pathname.
+    // extract args from pathname.
     var args = pathname.split('/').slice(3);
     if (args.length < 2) {
       response.writeHead(404);
       response.end('Not found (code:1)');
       return;
     }
+    // TODO: detemine user and check.
     var userId = args[0];
-    var handler = resourceHandlers[args[1]];
+    // detemine request resource handler.
+    var handler = determineHandler(args[1], determineMethod(request));
     if (!handler) {
       response.writeHead(404);
       response.end('Not found (code:2)');
       return;
     }
+    // dispatch to handler.
     handler(request, response, userId, query);
   }
 
-  function handleSubscriptions(request, response, user, query)
+  function determineHandler(resource, method)
   {
-    // TODO:
-    console.log('user=%s query=%s', user, JSON.stringify(query));
-    response.writeHead(200, { 'Content-Type': 'text/plain' });
-    response.end('Hello World: handleSubscriptions');
+    var methodHandlers = resourceHandlers[resource];
+    if (!methodHandlers) {
+      return null;
+    }
+    return methodHandlers[method];
   }
 
-  function handleCategories(request, response, user, query)
+  function determineMethod(request)
   {
-    // TODO:
-    console.log('user=%s query=%s', user, JSON.stringify(query));
-    response.writeHead(200, { 'Content-Type': 'text/plain' });
-    response.end('Hello World: handleCategories');
+    var method = request.method;
+    if (method === 'PATCH') {
+      var subMethod = request.headers['x-patch-submethod'];
+      if (subMethod) {
+        return method + '_' + subMethod.toUpperCase();
+      }
+    }
+    return request.method;
   }
 
-  function handleFeeds(request, response, user, query)
+  // FIXME: remove this after implement all resource handlers.
+  function handleDefault(request, response, user, query)
   {
-    // TODO:
-    console.log('user=%s query=%s', user, JSON.stringify(query));
+    var name = handleDefault.caller.name;
+    console.log('%s: user=%s query=%s', name, user, JSON.stringify(query));
     response.writeHead(200, { 'Content-Type': 'text/plain' });
-    response.end('Hello World: handleFeeds');
+    response.end('Hello World: ' + name);
   }
 
-  function handleUnreads(request, response, user, query)
+  function handleSubscriptionsGet(request, response, user, query)
   {
     // TODO:
-    console.log('user=%s query=%s', user, JSON.stringify(query));
-    response.writeHead(200, { 'Content-Type': 'text/plain' });
-    response.end('Hello World: handleUnreads');
+    handleDefault(request, response, user, query);
   }
 
-  function handleFavorites(request, response, user, query)
+  function handleSubscriptionsPatchAdd(request, response, user, query)
   {
     // TODO:
-    console.log('user=%s query=%s', user, JSON.stringify(query));
-    response.writeHead(200, { 'Content-Type': 'text/plain' });
-    response.end('Hello World: handleFavorites');
+    handleDefault(request, response, user, query);
+  }
+
+  function handleSubscriptionsPatchReplace(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleSubscriptionsPatchRemove(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleCategoriesGet(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleCategoriesPatchAdd(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleCategoriesPatchReplace(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleCategoriesPatchRemove(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleFeedsGet(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleUnreadsGet(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleUnreadsPatchAdd(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleUnreadsPatchRemove(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleFavoritesGet(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleFavoritesPatchAdd(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
+  }
+
+  function handleFavoritesPatchRemove(request, response, user, query)
+  {
+    // TODO:
+    handleDefault(request, response, user, query);
   }
 }
 

@@ -119,6 +119,10 @@ function FeedServer(config)
   function determineMethod(request)
   {
     var method = request.method;
+    var override = request.headers['x-http-method-override'];
+    if (override) {
+      method = override;
+    }
     if (method === 'PATCH') {
       var subMethod = request.headers['x-patch-submethod'];
       if (subMethod) {

@@ -142,12 +142,6 @@ function FeedServer(config)
     return request.method;
   }
 
-  function newFilterUnreadsGet(request, query)
-  {
-    // TODO: implement filter.
-    return null;
-  }
-
   function respond(request, response, reader, filter)
   {
     // FIXME: support JSONP request.
@@ -199,6 +193,12 @@ function FeedServer(config)
     console.log('%s: user=%s query=%s', name, user, JSON.stringify(query));
     response.writeHead(200, { 'Content-Type': 'text/plain' });
     response.end('Hello World: ' + name);
+  }
+
+  function filterUnreadGet(request, query)
+  {
+    // TODO: implement filter.
+    return null;
   }
 
   function handleSubscriptionsGet(request, response, user, query)
@@ -258,7 +258,7 @@ function FeedServer(config)
   function handleUnreadsGet(request, response, user, query)
   {
     var reader = user.getUnreadsDB().getReader();
-    var filter = newFilterUnreadsGet(request, query);
+    var filter = filterUnreadGet(request, query);
     respond(request, response, reader, filter);
   }
 

@@ -95,16 +95,26 @@ function FeedServer(config)
       response.writeHead(404);
       response.end('Not found (code:2)');
       return;
+    } else if (!hasGrant(request, user)) {
+      response.writeHead(404);
+      response.end('Not found (code:3)');
+      return;
     }
     // detemine request resource handler.
     var handler = determineHandler(args[1], determineMethod(request));
     if (!handler) {
       response.writeHead(404);
-      response.end('Not found (code:3)');
+      response.end('Not found (code:4)');
       return;
     }
     // dispatch to handler.
     handler(request, response, user, query);
+  }
+
+  function hasGrant(request, user)
+  {
+    // TODO: check access grant for user.
+    return true;
   }
 
   function determineHandler(resource, method)

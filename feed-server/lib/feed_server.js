@@ -142,6 +142,12 @@ function FeedServer(config)
     return request.method;
   }
 
+  function newFilterUnreadsGet(request, query)
+  {
+    // TODO: implement filter.
+    return null;
+  }
+
   function respond(request, response, reader, filter)
   {
     // FIXME: support JSONP request.
@@ -252,8 +258,8 @@ function FeedServer(config)
   function handleUnreadsGet(request, response, user, query)
   {
     var reader = user.getUnreadsDB().getReader();
-    // TODO: implement filter.
-    respond(request, response, reader, null);
+    var filter = newFilterUnreadsGet(request, query);
+    respond(request, response, reader, filter);
   }
 
   function handleUnreadsPatchAdd(request, response, user, query)

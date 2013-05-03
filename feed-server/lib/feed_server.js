@@ -197,8 +197,22 @@ function FeedServer(config)
 
   function filterUnreadGet(request, query)
   {
-    // TODO: implement filter.
-    return null;
+    var prefix = query['prefix'];
+    if (!prefix) {
+      return function(line) {
+        return true;
+      };
+    }
+    return function(line) {
+      try {
+        var row = JSON.parse(line);
+        if (row['path'].substring(0, prefix.length) === prefix) {
+          return true;
+        }
+      } catch (e) {
+      }
+      return false;
+    };
   }
 
   function handleSubscriptionsGet(request, response, user, query)

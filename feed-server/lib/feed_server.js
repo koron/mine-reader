@@ -63,9 +63,9 @@ function FeedServer(config)
   {
     try {
       response.writeHead(500);
-      response.end(err.stack);
+      response.end(err);
     } catch (e) {
-      consle.error('Error handling error', e);
+      console.error('Error handling error', e);
       request.domain.dispose();
     }
   }
@@ -130,6 +130,50 @@ function FeedServer(config)
       }
     }
     return request.method;
+  }
+
+  function respond(request, response, reader, filter)
+  {
+    // FIXME: support JSONP request.
+    var context = {
+      first: true,
+      send_line: send_line_first,
+    };
+
+    response.writeHead(200, { 'Content-type': 'application/json' });
+    response.write('[');
+
+    // setup reader as source.
+    if (filter) {
+      reader.on('line', function(line) {
+        if (filter(line)) {
+          context.send_line(line);
+        }
+      });
+    } else {
+      reader.on('line', function(line) { context.send_line(line); });
+    }
+    reader.on('end', send_end);
+    reader.on('error', function(err) {
+      if (err.code !== 'ENOENT') {
+        console.warn(err.stack);
+      }
+      send_end();
+    });
+
+    function send_line_first(line) {
+      response.write('\n');
+      response.write(line);
+      context.send_line = send_line;
+      context.first = false;
+    }
+    function send_line(line) {
+      response.write(',\n');
+      response.write(line);
+    }
+    function send_end() {
+      response.end('\n]');
+    }
   }
 
   // FIXME: remove this after implement all resource handlers.
@@ -197,8 +241,9 @@ function FeedServer(config)
 
   function handleUnreadsGet(request, response, user, query)
   {
-    // TODO:
-    handleDefault(request, response, user, query);
+    var reader = user.getUnreadsDB().getReader();
+    // TODO: implement filter.
+    respond(request, response, reader, null);
   }
 
   function handleUnreadsPatchAdd(request, response, user, query)

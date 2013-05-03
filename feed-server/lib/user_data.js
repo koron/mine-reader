@@ -3,6 +3,8 @@
 module.exports.getInstance = getInstance;
 
 var fs = require('fs');
+var path = require('path');
+var FileDB = require('./file_db.js');
 
 function getInstance(dataDir)
 {
@@ -22,4 +24,9 @@ function getInstance(dataDir)
 function UserData(dataDir)
 {
   this.dataDir = dataDir;
+}
+
+UserData.prototype.getUnreadsDB = function()
+{
+  return new FileDB(path.join(this.dataDir, 'unreads'));
 }

@@ -8,6 +8,7 @@ var url = require('url');
 var fs = require('node-fs');
 var userData = require('./user_data.js');
 var path = require('path');
+var util = require('util');
 
 var PREFIX = '/feed/users/';
 
@@ -52,7 +53,7 @@ function FeedServer(config)
     d.add(request);
     d.add(response);
     d.on('error', function(err) {
-      handleError(request, response);
+      handleError(request, response, err);
     });
     d.run(function() {
       handleRequest(request, response);
@@ -63,7 +64,7 @@ function FeedServer(config)
   {
     try {
       response.writeHead(500);
-      response.end(err);
+      response.end(err.stack);
     } catch (e) {
       console.error('Error handling error', e);
       request.domain.dispose();
@@ -153,7 +154,7 @@ function FeedServer(config)
 
     if ('read' in request) {
       request.on('readable', function() {
-        onData(stream.read());
+        onData(request.read());
       });
     } else {
       request.on('data', onData);
@@ -168,7 +169,7 @@ function FeedServer(config)
       all += data;
     }
 
-    function onError()
+    function onEnd()
     {
       try {
         request.bodyJSON = JSON.parse(all);
@@ -267,8 +268,40 @@ function FeedServer(config)
 
   function filterUnreadsRemove(filterSrc)
   {
-    // TODO: implement identical and range filters.
-    return false;
+    // identical filter case.
+    var targets = filterSrc['targets'];
+    if (targets) {
+      var table = {}
+      for (var i = 0, len = targets.length; i < len; ++i) {
+        table[targets[i]] = true;
+      }
+      return function(line) {
+        try {
+          var obj = JSON.parse(line);
+          return obj['id'] in table;
+        } catch (err) {
+          // ignore error.
+        }
+        return false;
+      }
+    }
+    // range filter case.
+    var upper = filterSrc['upper'];
+    if (upper) {
+      return function(line) {
+        try {
+          var obj = JSON.parse(line);
+          if (obj['serial'] <= upper) {
+            return true;
+          }
+        } catch (err) {
+          // ignore error.
+        }
+        return false;
+      }
+    }
+    // fall back case: no remove.
+    return function(line) { return false; }
   }
 
   function handleSubscriptionsGet(request, response, user, query)
@@ -345,16 +378,16 @@ function FeedServer(config)
     function doRemove(filterSrc, err)
     {
       if (err) {
-        respondJSON(500, err);
+        respondJSON(request, response, 400, util.inspect(err));
         return;
       }
 
       var filter = filterUnreadsRemove(filterSrc);
       user.getUnreadsDB().remove(filter, function(success) {
         if (success) {
-          respondJSON(200, true);
+          respondJSON(request, response, 200, true);
         } else {
-          respondJSON(500, 'Remove patch failed');
+          respondJSON(request, response, 500, 'Remove patch failed');
         }
       });
     }

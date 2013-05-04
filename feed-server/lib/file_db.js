@@ -30,11 +30,11 @@ FileDB.prototype.remove = function(filter, callback)
   {
     var reader = new FileReader(currPath);
     reader.on('line', onReaderLine);
-    reader.on('end', onReaderEnded);
-    reader.on('error', onReaderErrored);
+    reader.on('end', onReaderEnd);
+    reader.on('error', onReaderError);
   }
 
-  function onReaderLined(line)
+  function onReaderLine(line)
   {
     if (!filter(line)) {
       writer.write(line);
@@ -42,19 +42,19 @@ FileDB.prototype.remove = function(filter, callback)
     }
   }
 
-  function onReaderEnded()
+  function onReaderEnd()
   {
     writer.end(function() {
       swapFiles(currPath, newPath, oldPath, function(success) {
-        endCallback(success);
+        callback(success);
       });
     });
   }
 
-  function onReaderErrored()
+  function onReaderError(err)
   {
     writer.end(function() {
-      endCallback(false);
+      callback(false, err);
     });
   }
 }

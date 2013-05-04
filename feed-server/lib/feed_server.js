@@ -142,6 +142,56 @@ function FeedServer(config)
     return request.method;
   }
 
+  function readJSON(request, callback)
+  {
+    if ('bodyJSON' in request) {
+      process.nextTick(function() {
+        callback(request.bodyJSON, null)
+      });
+      return;
+    }
+
+    if ('read' in request) {
+      request.on('readable', function() {
+        onData(stream.read());
+      });
+    } else {
+      request.on('data', onData);
+    }
+    request.on('end', onEnd);
+    request.on('error', onError);
+
+    var all = '';
+
+    function onData(data)
+    {
+      all += data;
+    }
+
+    function onError()
+    {
+      try {
+        request.bodyJSON = JSON.parse(all);
+        callback(request.bodyJSON, null);
+      } catch (err) {
+        onError(err);
+      }
+    }
+
+    function onError(err)
+    {
+      request.bodyJSON = {};
+      callback(request.bodyJSON, err);
+    }
+  }
+
+  function respondJSON(request, response, code, json)
+  {
+    // FIXME: support JSONP request.
+    response.writeHead(code, { 'Content-type': 'application/json' });
+    response.end(JSON.stringify(json));
+  }
+
   function respond(request, response, reader, filter)
   {
     // FIXME: support JSONP request.
@@ -215,6 +265,12 @@ function FeedServer(config)
     };
   }
 
+  function filterUnreadsRemove(request, query)
+  {
+    // TODO: implement identical and range filters.
+    return false;
+  }
+
   function handleSubscriptionsGet(request, response, user, query)
   {
     // TODO:
@@ -284,8 +340,14 @@ function FeedServer(config)
 
   function handleUnreadsPatchRemove(request, response, user, query)
   {
-    // TODO:
-    handleDefault(request, response, user, query);
+    var filter = filterUnreadsRemove(request, query);
+    user.getUnreadsDB().remove(filter, function(success) {
+      if (success) {
+        respondJSON(200, true);
+      } else {
+        respondJSON(500, 'Remove patch failed');
+      }
+    });
   }
 
   function handleFavoritesGet(request, response, user, query)

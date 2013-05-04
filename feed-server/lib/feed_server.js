@@ -265,7 +265,7 @@ function FeedServer(config)
     };
   }
 
-  function filterUnreadsRemove(request, query)
+  function filterUnreadsRemove(filterSrc)
   {
     // TODO: implement identical and range filters.
     return false;
@@ -340,14 +340,24 @@ function FeedServer(config)
 
   function handleUnreadsPatchRemove(request, response, user, query)
   {
-    var filter = filterUnreadsRemove(request, query);
-    user.getUnreadsDB().remove(filter, function(success) {
-      if (success) {
-        respondJSON(200, true);
-      } else {
-        respondJSON(500, 'Remove patch failed');
+    readJSON(request, doRemove);
+
+    function doRemove(filterSrc, err)
+    {
+      if (err) {
+        respondJSON(500, err);
+        return;
       }
-    });
+
+      var filter = filterUnreadsRemove(filterSrc);
+      user.getUnreadsDB().remove(filter, function(success) {
+        if (success) {
+          respondJSON(200, true);
+        } else {
+          respondJSON(500, 'Remove patch failed');
+        }
+      });
+    }
   }
 
   function handleFavoritesGet(request, response, user, query)
